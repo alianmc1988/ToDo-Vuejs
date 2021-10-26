@@ -83,7 +83,9 @@ export default {
       this.copyTodos = [...this.todos]
     },
     buscar(text){
-      return this.item_to_show = this.copyTodos.filter(el=> el.title===text.toUpperCase())[0]        
+      this.item_to_show = this.copyTodos.filter(el=> el.title===text.toUpperCase())[0]
+      if (!this.item_to_show)
+        return alert('There is no task that match with your request')        
     }
 
   },
