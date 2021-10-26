@@ -5,13 +5,14 @@
       <router-link to="/about">About</router-link> -->
       <Navigation/>
     </div>
-    <router-view/>
+    
   </div>
 </template>
 
 
 <script>
 import Navigation from './components/Navigation.vue'
+
 export default {
   components:{
     Navigation

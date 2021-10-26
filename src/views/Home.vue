@@ -33,7 +33,16 @@
 import TodoSearch from '../components/Search.vue'
 import Todo from '../components/Todos.vue'
 import TodoAdd from '../components/TodoAdd.vue'
-import TodoItems from '../components/TodoItems.vue'
+import TodoItems from '../components/TodoItems.vue' 
+import axios from 'axios'
+
+class TodoInterface {
+  constructor(id,title,completed){
+    this.id = id,
+    this.title = title,
+    this.completed = completed
+  }
+}
 export default {
   name: 'Home',
   components: {
@@ -45,48 +54,54 @@ export default {
   },
   data() {
     return {
-      todos:[
-        {
-          id:0,
-          title: 'GYM',
-          completed:false
-        },
-         {
-          id:1,
-          title: 'STUDY VUEJS',
-          completed:false
-        },
-         
-      ],
+      todos:[],
       copyTodos:[],
       item_to_show:false
     }
   },
-  created() {
-    this.copyTodos = [...this.todos]
+  
+  created() {   
     
+    axios.get('http://localhost:4200/todo',{timeout:1000})
+    .then(response=> {
+      console.log(response.data[0])
+      this.todos = response.data
+      this.copyTodos = [...this.todos]
+      return
+      })
+    .catch(err=>console.log(`Servidor caido ${err}`)) 
+     
+   
   },
   methods:{
     eliminar(id){
-      this.todos = this.todos.filter(el=>el.id != id)     
-      this.copyTodos = [...this.todos] 
-       if(this.item_to_show.id == id)
-        this.item_to_show = false    
+      axios.delete(`http://localhost:4200/todo/${id}`,{timeout:1000}).then(el=>{
+        if(el.status=='OK')
+        console.log(el)
+          this.todos = this.todos.filter(el=>el.id != id)     
+          this.copyTodos = [...this.todos] 
+        }).catch(el=> console.log(el))
     },
     addTodo(texto){
-      let newTodo={
-      id:this.todos.length? this.todos[this.todos.length-1].id+1:0,
-      title:texto.toUpperCase(),
-      completed:false
-    }
-      this.todos.push(newTodo)
-      this.copyTodos = [...this.todos]
+      let newtoDo = new TodoInterface(this.todos.length? this.todos[this.todos.length-1].id+1:0,texto.toUpperCase(),false)
+      axios.post(`http://localhost:4200/todo`,newtoDo)
+      .then(el=>{
+       
+        this.todos.push(el.data)
+        this.copyTodos = [...this.todos]
+      })
+      .catch(error => {
+        console.log(error)
+        return alert('Ha ocurrido un error en el servidor y no se ha guardado la informacion')  
+      })
+
+      
     },
     buscar(text){
       this.item_to_show = this.copyTodos.filter(el=> el.title===text.toUpperCase())[0]
       if (!this.item_to_show)
         return alert('There is no task that match with your request')        
-    }
+    },
 
   },
 }
